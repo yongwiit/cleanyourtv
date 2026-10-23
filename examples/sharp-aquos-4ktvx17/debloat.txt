@@ -1,0 +1,51 @@
+# SHARP AQUOS-4KTVX17 (lc_theux, board kane, MediaTek MT5891), Android TV 8.0, firmware OTT1.180130.001 (31900, build 20211112, patch 2021-01-05)
+# Asian firmware; about 2 GB RAM. Not a CVTE board: no com.cvte.* packages, MediaTek's own TV stack.
+#
+# Apply:   TV_HOST=<tv ip> tools/disable.sh examples/sharp-aquos-4ktvx17/debloat.txt
+# Undo:    TV_HOST=<tv ip> tools/restore.sh examples/sharp-aquos-4ktvx17/debloat.txt
+# Everything is DISABLED, not uninstalled. Comment out any line you want to keep.
+#
+# Stock launcher: com.google.android.tvlauncher (Android TV Home). Sharp's own
+# jp.co.sharp.av.android.tvlauncher is already disabled at the factory; it is not in this list.
+# Live TV: jp.co.sharp.av.android.aquostvappasia (answers VIEW for channels; tuner input com.mediatek.tvinput).
+# Kept on purpose: the TV app, tuner and HDMI inputs, Sharp remote/key services (neuf, pouf, bmode,
+# rcservice, uei.quicksetsdk.sharpble), the Tools menu, Play Store/Services, keyboard, Google Assistant,
+# Chromecast built-in (mediashell) and Sharp's system updater.
+#
+# Boot and Home: at power-on the firmware resumes the last input (TV app or HDMI) and has no setting for
+# it, so a replacement launcher has to take Home back itself after BOOT_COMPLETED / screen-on.
+# Nothing re-enabled itself after reboots: this firmware does not restore disabled packages at boot.
+#
+# Firmware notes, found while testing (nothing to do with the list):
+# - Bluetooth audio (A2DP) is not available: the stack only starts the GATT and HID profiles (remotes,
+#   keyboards, gamepads). A2dpService exists in the Bluetooth app but is never started; the only audio
+#   outputs are the speakers and S/PDIF.
+# - An AirPlay receiver (io.github.jqssun.airplay) was tried and removed: the iPhone lists the TV but never
+#   connects. Android 8's mDNS advertising uses the empty net.hostname here, so the address never resolves.
+# - Sharp's network-control service (jp.co.sharp.av.android.ipcontrolservice) listens on TCP 10002 on all
+#   interfaces with no login (pre-existing): anyone on the LAN can query the model or send POWR0 (standby).
+#   The same service crashes now and then on SSDP ("Buffer size <= 0"); it restarts by itself.
+# - No device admin (android.software.device_admin is missing), so DevicePolicyManager.lockNow does nothing.
+# - Volume keys never reach Android input (MediaTek handles them). Private DNS needs Android 9, not here.
+#
+# Tested: disabled 2026-10-23, about 1 day of daily use so far; nothing broke, nothing re-enabled after reboot.
+
+# Sharp and Google telemetry
+com.sharplabs.dmt.aas.analyticsservice # Sharp analytics, only a StartupReceiver
+com.google.android.feedback            # Google feedback / crash report sender
+
+# Recommendation rows, tips and promos
+com.google.android.tvrecommendations
+com.google.android.leanbacklauncher.recommendations
+com.google.android.tvtutorials         # tips / tutorial cards
+jp.co.sharp.av.android.storedemoapplication # shop demo playlist
+android.autoinstalls.config.sharp.av   # Play Auto Installs, pushes promoted apps
+
+# Preloaded apps and services nobody asked for
+com.google.android.backdrop            # Ambient screensaver; the basic Android screensaver stays
+com.android.printspooler               # printing, no printers on a TV
+com.google.android.videos              # Google Play Movies & TV
+com.google.android.play.games
+
+# Stock Android TV launcher, replaced by another Home app (set the new Home first)
+com.google.android.tvlauncher
